@@ -96,6 +96,7 @@ export const withTable = (editor: Editor) => {
 
   editor.deleteFragment = (...args) => {
     if (editor.selection && isInSameTable(editor)) {
+      console.log('deleteBackward', editor.selection)
       if (editor.selection.focus.path.join('') === editor.selection.anchor.path.join('')) {
         return deleteFragment(...args)
       }
@@ -106,12 +107,15 @@ export const withTable = (editor: Editor) => {
         },
       })
 
+      console.log(selectedCells)
       for (let cell of selectedCells) {
+        console.log(cell)
         Transforms.setSelection(editor, Editor.range(editor, cell[1]))
 
         const [content] = Editor.nodes(editor, {
           match: n => n.type === 'table-content',
         })
+        console.log(content)
 
         Transforms.insertNodes(editor, createContent(), { at: content[1] })
         Transforms.removeNodes(editor, { at: Path.next(content[1]) })
@@ -352,7 +356,18 @@ const CellComponent: React.FC<{
   }
   dataKey: string
 } & RenderElementProps> = ({ attributes, node, dataKey, children }) => {
+  const editor = useEditor()
   const { selectedCell } = node
+  const handleClickTd = (event: { detail: number }) => {
+    const TRIPLE_CLICK = 3
+    if (event.detail >= TRIPLE_CLICK && editor.selection) {
+      const range = Editor.range(editor, editor.selection.anchor.path)
+      setTimeout(() => {
+        Transforms.setSelection(editor, range)
+      }, 200)
+      return
+    }
+  }
 
   return (
     <td
@@ -362,6 +377,7 @@ const CellComponent: React.FC<{
       data-key={dataKey}
       colSpan={node.colspan}
       rowSpan={node.rowspan}
+      onClick={e => handleClickTd(e)}
       onDragStart={e => e.preventDefault()}
       style={{
         position: 'relative',
