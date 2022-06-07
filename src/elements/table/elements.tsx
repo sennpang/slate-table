@@ -4,177 +4,177 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from 'react';
+} from 'react'
 import {
   RenderElementProps,
   useSelected,
   useEditor,
   useSlate,
-} from 'slate-react';
-import { Editor, NodeEntry, Transforms, Range, Path } from 'slate';
-import { removeSelection, addSelection } from './selection';
-import { options } from './options';
-import { createContent } from './creator';
-import { TableCardbar, HorizontalToolbar, VerticalToolbar } from './ui';
-import cx from 'classnames';
-import { isInSameTable } from './utils';
-import './table.css';
+} from 'slate-react'
+import { Editor, NodeEntry, Transforms, Range, Path } from 'slate'
+import { removeSelection, addSelection, selectedNodes } from './selection'
+import { options } from './options'
+import { createContent } from './creator'
+import { TableCardbar, HorizontalToolbar, VerticalToolbar } from './ui'
+import cx from 'classnames'
+import { isInSameTable } from './utils'
+import './table.css'
 
 export const withTable = (editor: Editor) => {
-  const { addMark, removeMark, deleteBackward, deleteFragment } = editor;
+  const { addMark, removeMark, deleteBackward, deleteFragment } = editor
 
   editor.addMark = (key, value) => {
     if (editor.selection) {
-      const lastSelection = editor.selection;
+      const lastSelection = editor.selection
 
       const selectedCells = Editor.nodes(editor, {
         match: n => n.selectedCell,
         at: [],
-      });
+      })
 
-      let isTable = false;
+      let isTable = false
 
       for (let cell of selectedCells) {
         if (!isTable) {
-          isTable = true;
+          isTable = true
         }
 
         const [content] = Editor.nodes(editor, {
           match: n => n.type === 'table-content',
           at: cell[1],
-        });
+        })
 
         if (Editor.string(editor, content[1]) !== '') {
-          Transforms.setSelection(editor, Editor.range(editor, cell[1]));
-          addMark(key, value);
+          Transforms.setSelection(editor, Editor.range(editor, cell[1]))
+          addMark(key, value)
         }
       }
 
       if (isTable) {
-        Transforms.select(editor, lastSelection);
-        return;
+        Transforms.select(editor, lastSelection)
+        return
       }
     }
 
-    addMark(key, value);
-  };
+    addMark(key, value)
+  }
 
   editor.removeMark = key => {
     if (editor.selection) {
-      const lastSelection = editor.selection;
+      const lastSelection = editor.selection
       const selectedCells = Editor.nodes(editor, {
         match: n => {
-          return n.selectedCell;
+          return n.selectedCell
         },
         at: [],
-      });
+      })
 
-      let isTable = false;
+      let isTable = false
       for (let cell of selectedCells) {
         if (!isTable) {
-          isTable = true;
+          isTable = true
         }
 
         const [content] = Editor.nodes(editor, {
           match: n => n.type === 'table-content',
           at: cell[1],
-        });
+        })
 
         if (Editor.string(editor, content[1]) !== '') {
-          Transforms.setSelection(editor, Editor.range(editor, cell[1]));
-          removeMark(key);
+          Transforms.setSelection(editor, Editor.range(editor, cell[1]))
+          removeMark(key)
         }
       }
 
       if (isTable) {
-        Transforms.select(editor, lastSelection);
-        return;
+        Transforms.select(editor, lastSelection)
+        return
       }
     }
-    removeMark(key);
-  };
+    removeMark(key)
+  }
 
   editor.deleteFragment = (...args) => {
     if (editor.selection && isInSameTable(editor)) {
       const selectedCells = Editor.nodes(editor, {
         match: n => {
-          return n.selectedCell;
+          return n.selectedCell
         },
-      });
+      })
 
       for (let cell of selectedCells) {
-        Transforms.setSelection(editor, Editor.range(editor, cell[1]));
+        Transforms.setSelection(editor, Editor.range(editor, cell[1]))
 
         const [content] = Editor.nodes(editor, {
           match: n => n.type === 'table-content',
-        });
+        })
 
-        Transforms.insertNodes(editor, createContent(), { at: content[1] });
-        Transforms.removeNodes(editor, { at: Path.next(content[1]) });
+        Transforms.insertNodes(editor, createContent(), { at: content[1] })
+        Transforms.removeNodes(editor, { at: Path.next(content[1]) })
       }
 
-      return;
+      return
     }
 
     Transforms.removeNodes(editor, {
       match: n => n.type === 'table',
-    });
+    })
 
-    deleteFragment(...args);
-  };
+    deleteFragment(...args)
+  }
 
   editor.deleteBackward = (...args) => {
-    const { selection } = editor;
+    const { selection } = editor
 
     if (selection && Range.isCollapsed(selection)) {
       const isInTable = Editor.above(editor, {
         match: n => n.type === 'table',
-      });
+      })
 
       if (isInTable) {
-        const start = Editor.start(editor, selection);
-        const isStart = Editor.isStart(editor, start, selection);
+        const start = Editor.start(editor, selection)
+        const isStart = Editor.isStart(editor, start, selection)
 
         const currCell = Editor.above(editor, {
           match: n => n.type === 'table-cell',
-        });
+        })
 
         if (isStart && currCell && !Editor.string(editor, currCell[1])) {
-          return;
+          return
         }
       }
     }
 
-    deleteBackward(...args);
-  };
+    deleteBackward(...args)
+  }
 
-  return editor;
-};
+  return editor
+}
 
 export const Table: React.FC<RenderElementProps> = props => {
-  const { attributes, children, element } = props;
-  const selected = useSelected();
-  const editor = useEditor();
+  const { attributes, children, element } = props
+  const selected = useSelected()
+  const editor = useEditor()
 
   switch (element.type) {
     case 'table': {
-      let existSelectedCell = false;
-      let table: NodeEntry | null = null;
+      let existSelectedCell = false
+      let table: NodeEntry | null = null
 
       if (selected && editor.selection) {
         [table] = Editor.nodes(editor, {
           match: n => n.type === 'table',
           at: Editor.path(editor, editor.selection),
-        });
+        })
 
         if (table) {
           const [selectedCell] = Editor.nodes(editor, {
             at: Editor.range(editor, table[1]),
             match: n => n.selectedCell,
-          });
+          })
 
           if (selectedCell) {
-            existSelectedCell = true;
+            existSelectedCell = true
           }
         }
       }
@@ -188,7 +188,7 @@ export const Table: React.FC<RenderElementProps> = props => {
             {children}
           </TableComponent>
         </div>
-      );
+      )
     }
 
     case 'table-row': {
@@ -202,7 +202,7 @@ export const Table: React.FC<RenderElementProps> = props => {
         >
           {children}
         </tr>
-      );
+      )
     }
 
     case 'table-cell': {
@@ -214,7 +214,7 @@ export const Table: React.FC<RenderElementProps> = props => {
         >
           {children}
         </CellComponent>
-      );
+      )
     }
 
     case 'table-content': {
@@ -222,21 +222,21 @@ export const Table: React.FC<RenderElementProps> = props => {
         <div slate-table-element="content" className="table-content">
           {children}
         </div>
-      );
+      )
     }
 
     default:
-      return <p {...props} />;
+      return <p {...props} />
   }
-};
+}
 
 const TableComponent: React.FC<{
-  table: NodeEntry | null;
+  table: NodeEntry | null
 } & RenderElementProps> = props => {
-  const { table, children } = props;
-  const editor = useSlate();
-  const selected = useSelected();
-  const ref = useRef<HTMLTableElement>(null);
+  const { table, children } = props
+  const editor = useSlate()
+  const selected = useSelected()
+  const ref = useRef<HTMLTableElement>(null)
 
   const resizeTable = useCallback(() => {
     if (ref.current) {
@@ -251,29 +251,29 @@ const TableComponent: React.FC<{
             at: [],
             match: n => n.key === cell.dataset.key,
           },
-        );
-      });
+        )
+      })
     }
-  }, [editor]);
+  }, [editor])
 
   useEffect(() => {
-    resizeTable();
-  }, [resizeTable, selected, editor.selection]);
+    resizeTable()
+  }, [resizeTable, selected, editor.selection])
 
   useEffect(() => {
-    if (!selected) removeSelection(editor);
-  }, [selected, editor]);
+    if (!selected) removeSelection(editor)
+  }, [selected, editor])
 
-  const [startKey, setStartKey] = useState<string>('');
+  const [startKey, setStartKey] = useState<string>('')
 
   const startNode = useMemo(() => {
     const [node] = Editor.nodes(editor, {
       match: n => n.key === startKey,
       at: [],
-    });
+    })
 
-    return node;
-  }, [startKey, editor]);
+    return node
+  }, [startKey, editor])
 
   const ResizeToolbar = useMemo(() => {
     return (
@@ -285,8 +285,8 @@ const TableComponent: React.FC<{
           <VerticalToolbar table={ref.current} tableNode={table} />
         </>
       )
-    );
-  }, [selected, table]);
+    )
+  }, [selected, table])
 
   return (
     <>
@@ -298,53 +298,62 @@ const TableComponent: React.FC<{
         style={options.tableStyle}
         onDragStart={e => e.preventDefault()}
         onMouseDown={e => {
-          const cell = (e.target as HTMLBaseElement).closest('td');
-          const key = cell?.getAttribute('data-key') || '';
-          setStartKey(key);
+          const cell = (e.target as HTMLBaseElement).closest('td')
+          const key = cell?.getAttribute('data-key') || ''
+          setStartKey(key)
         }}
         onMouseMove={e => {
-          const cell = (e.target as HTMLBaseElement).closest('td');
+          const cell = (e.target as HTMLBaseElement).closest('td')
           if (cell && startKey) {
-            const endKey = cell.getAttribute('data-key');
+            const endKey = cell.getAttribute('data-key')
 
             const [endNode] = Editor.nodes(editor, {
               match: n => n.key === endKey,
               at: [],
-            });
+            })
 
             addSelection(
               editor,
               table,
               Editor.path(editor, startNode[1]),
               Editor.path(editor, endNode[1]),
-            );
+            )
           }
         }}
         onMouseUp={() => {
-          setStartKey('');
-          resizeTable();
+          setStartKey('')
+          resizeTable()
+          const { selection } = editor
+          console.log(selection, startKey, selectedNodes(editor), selection && Range.isCollapsed(selection))
+          if (selection && Range.isCollapsed(selection) && selectedNodes(editor)) {
+            removeSelection(editor)
+            console.log(startKey, 233, Range.isCollapsed(selection))
+          }
         }}
         onMouseLeave={() => {
-          setStartKey('');
+          setStartKey('')
+        }}
+        onClick={() => {
+
         }}
       >
         <tbody slate-table-element="tbody">{children}</tbody>
       </table>
     </>
-  );
-};
+  )
+}
 
 const CellComponent: React.FC<{
   node: {
-    width: number;
-    height: number;
-    selectedCell?: boolean;
-    colspan?: number;
-    rowspan?: number;
-  };
-  dataKey: string;
+    width: number
+    height: number
+    selectedCell?: boolean
+    colspan?: number
+    rowspan?: number
+  }
+  dataKey: string
 } & RenderElementProps> = ({ attributes, node, dataKey, children }) => {
-  const { selectedCell } = node;
+  const { selectedCell } = node
 
   return (
     <td
@@ -376,5 +385,5 @@ const CellComponent: React.FC<{
       </span> */}
       {children}
     </td>
-  );
-};
+  )
+}

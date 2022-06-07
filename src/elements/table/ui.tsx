@@ -6,7 +6,7 @@ import React, {
   useState,
   useRef,
 } from 'react'
-import { useSlate, useEditor } from 'slate-react'
+import { useSlate, useEditor, ReactEditor } from 'slate-react'
 import { Editor, Transforms, NodeEntry, Range } from 'slate'
 import { Button } from 'antd'
 import {
@@ -32,7 +32,7 @@ import {
   removeRow,
 } from './commands'
 import cx from 'classnames'
-import { splitedTable } from './selection'
+import { removeSelection, splitedTable } from './selection'
 import { options } from './options'
 import './ui.css'
 
@@ -49,10 +49,17 @@ export const TableCardbar: React.FC<TableCardbarProps> = props => {
 
   const run = (action: (table: any, editor: Editor) => any) => () => {
     const selection: Range | null = editor.selection
+    ReactEditor.blur(editor)
     action(table, editor)
-    // Editor.range(editor, selection)
     if (selection) {
-      Transforms.setSelection(editor, selection)
+      setTimeout(() => {
+        let newSelection = { focus: selection.anchor, anchor: selection.anchor }
+        const node = Editor.node(editor, newSelection)
+        if (!node) return
+        Transforms.setSelection(editor, newSelection)
+        ReactEditor.focus(editor)
+      }, 50)
+      removeSelection(editor)
     }
   }
 
