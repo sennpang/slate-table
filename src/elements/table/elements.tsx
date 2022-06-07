@@ -96,6 +96,10 @@ export const withTable = (editor: Editor) => {
 
   editor.deleteFragment = (...args) => {
     if (editor.selection && isInSameTable(editor)) {
+      if (editor.selection.focus.path.join('') === editor.selection.anchor.path.join('')) {
+        return deleteFragment(...args)
+      }
+
       const selectedCells = Editor.nodes(editor, {
         match: n => {
           return n.selectedCell
@@ -324,17 +328,12 @@ const TableComponent: React.FC<{
           setStartKey('')
           resizeTable()
           const { selection } = editor
-          console.log(selection, startKey, selectedNodes(editor), selection && Range.isCollapsed(selection))
           if (selection && Range.isCollapsed(selection) && selectedNodes(editor)) {
             removeSelection(editor)
-            console.log(startKey, 233, Range.isCollapsed(selection))
           }
         }}
         onMouseLeave={() => {
           setStartKey('')
-        }}
-        onClick={() => {
-
         }}
       >
         <tbody slate-table-element="tbody">{children}</tbody>

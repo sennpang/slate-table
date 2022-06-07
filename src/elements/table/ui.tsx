@@ -58,7 +58,7 @@ export const TableCardbar: React.FC<TableCardbarProps> = props => {
         if (!node) return
         Transforms.setSelection(editor, newSelection)
         ReactEditor.focus(editor)
-      }, 50)
+      }, 200)
       removeSelection(editor)
     }
   }

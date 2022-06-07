@@ -3,9 +3,11 @@
   overflow: auto;
   border: solid 1px #000;
 }
+
 .table-tr {
   border: none;
 }
+
 .table-td {
   padding: 0;
   box-sizing: border-box;
@@ -13,13 +15,16 @@
   vertical-align: baseline;
   min-width: 32px;
 }
+
 .table-td ::selection {
   color: inherit;
-  background: none;
+  background: #b9d3fc;
 }
+
 .table-td.selectedCell {
   background: #b9d3fc;
 }
+
 .table-content {
   overflow: auto;
 }

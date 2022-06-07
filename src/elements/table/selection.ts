@@ -107,7 +107,6 @@ export function addSelection (
   removeSelection(editor)
   // addSelectionStyle();
 
-  console.log(editor.selection && Range.isCollapsed(editor.selection))
   if (!table) return []
   if (editor.selection && Range.isCollapsed(editor.selection)) {
     return []
@@ -130,6 +129,8 @@ export function addSelection (
 
   const { path: tailPath } = tail
   const { path: headPath } = head
+
+  if (tailPath.join('') === headPath.join('')) return []
 
   headPath.forEach((item: number, index: number) => {
     headPath[index] = Math.min(item, tailPath[index])
