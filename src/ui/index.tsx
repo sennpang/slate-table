@@ -1,1 +1,1 @@
-export * from './cardbar';
+export * from './cardbar'

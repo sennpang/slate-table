@@ -1,6 +1,7 @@
 .table-cardbar {
   top: -56px !important;
 }
+
 .table-horizontal-toolbar {
   -webkit-touch-callout: none;
   /* iOS Safari */
@@ -24,6 +25,7 @@
   top: -20px;
   left: 1px;
 }
+
 .table-horizontal-toolbar .table-dragger-item {
   display: inline-block;
   height: 16px;
@@ -31,6 +33,7 @@
   border: 1px solid #e8e8e8;
   position: relative;
 }
+
 .table-horizontal-toolbar .table-dragger-item .table-trigger {
   position: absolute;
   right: -4px;
@@ -40,9 +43,11 @@
   z-index: 10;
   cursor: col-resize;
 }
+
 .table-horizontal-toolbar .table-dragger-item .table-trigger:hover {
   background: #0589f3;
 }
+
 .table-horizontal-toolbar .table-dragger-item .table-trigger:active {
   background: transparent;
 }
@@ -69,12 +74,14 @@
   top: 1px;
   left: -20px;
 }
+
 .table-vertical-toolbar .table-dragger-item {
   width: 16px;
   background: #edf7ff;
   border: 1px solid #e8e8e8;
   position: relative;
 }
+
 .table-vertical-toolbar .table-dragger-item .table-trigger {
   position: absolute;
   left: 0;
@@ -84,9 +91,11 @@
   z-index: 10;
   cursor: row-resize;
 }
+
 .table-vertical-toolbar .table-dragger-item .table-trigger:hover {
   background: #0589f3;
 }
+
 .table-vertical-toolbar .table-dragger-item .table-trigger:active {
   background: transparent;
 }

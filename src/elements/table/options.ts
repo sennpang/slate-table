@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react';
+import { CSSProperties } from 'react'
 
 export const options = {
   defaultWidth: 50 as number,
@@ -8,4 +8,4 @@ export const options = {
     Layout: 'fixed',
     wordBreak: 'break-word',
   } as CSSProperties,
-};
+}
